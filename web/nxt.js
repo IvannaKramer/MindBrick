@@ -35,7 +35,12 @@ export class UsbTransport {
     await d.open();
     if (d.configuration === null) await d.selectConfiguration(1);
     const iface = d.configuration.interfaces[0];
-    await d.claimInterface(iface.interfaceNumber);
+    try {
+      await d.claimInterface(iface.interfaceNumber);
+    } catch (e) {
+      await d.close().catch(() => {});
+      throw new Error("The brick is already in use – by another browser tab or another program. Close or disconnect it there, then try again.");
+    }
     // The NXT has one "out" and one "in" bulk endpoint; look them up instead of hard-coding.
     const endpoints = iface.alternate.endpoints;
     this.epOut = endpoints.find((e) => e.direction === "out").endpointNumber;

@@ -98,6 +98,9 @@ task main()
     if (!("usb" in navigator)) { $("usb").disabled = true; log("This browser has no WebUSB (use Chrome or Edge)."); }
     if (!("serial" in navigator)) { $("bt").disabled = true; log("This browser has no Web Serial (needs Chrome 117+ on desktop, 137+ on Android)."); }
 
+    // Let go of the brick when this tab is closed or reloaded, so another tab can connect.
+    window.addEventListener("pagehide", () => { brick?.disconnect().catch(() => {}); });
+
     onClick("usb", () => connect(UsbTransport));
     onClick("bt", () => connect(SerialTransport));
     onClick("disconnect", async () => { await brick.disconnect(); brick = null; setConnected(false); log("Disconnected"); });

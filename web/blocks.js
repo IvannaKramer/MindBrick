@@ -75,6 +75,69 @@ export const MESSAGES = {
     NXT_BTN_LEFT: "left arrow",
     NXT_BTN_RIGHT: "right arrow",
     NXT_HELLO: "Hello!",
+    NXT_NOTE_B: "B",
+  },
+  de: {
+    NXT_CAT_EVENTS: "Start",
+    NXT_CAT_MOTORS: "Motoren",
+    NXT_CAT_MOVEMENT: "Bewegung",
+    NXT_CAT_SOUND: "Klang",
+    NXT_CAT_DISPLAY: "Anzeige",
+    NXT_CAT_CONTROL: "Steuerung",
+    NXT_CAT_SENSORS: "Sensoren",
+    NXT_CAT_OPERATORS: "Operatoren",
+    NXT_CAT_VARIABLES: "Variablen",
+
+    NXT_START: "wenn das Programm startet",
+    NXT_MOTOR_ON: "starte Motor %1 %2 mit %3 % Leistung",
+    NXT_MOTOR_FOR: "drehe Motor %1 %2 mit %3 % Leistung für %4 %5",
+    NXT_MOTOR_STOP: "stoppe Motor %1",
+    NXT_MOVE_FOR: "fahre %1 mit %2 % Leistung für %3 %4",
+    NXT_MOVE_START: "fahre los: links %1 % rechts %2 %",
+    NXT_TURN_FOR: "drehe nach %1 mit %2 % Leistung für %3 Sekunden",
+    NXT_MOVE_STOP: "halte an",
+    NXT_BEEP: "spiele Note %1 für %2 Sekunden",
+    NXT_TONE: "spiele Ton %1 Hz für %2 Sekunden",
+    NXT_SHOW_TEXT: "zeige Text %1 in Zeile %2",
+    NXT_SHOW_NUMBER: "zeige Zahl %1 in Zeile %2",
+    NXT_CLEAR_SCREEN: "lösche Anzeige",
+    NXT_WAIT: "warte %1 Sekunden",
+    NXT_REPEAT: "wiederhole %1 mal",
+    NXT_FOREVER: "wiederhole fortlaufend",
+    NXT_IF: "falls %1 dann",
+    NXT_ELSE: "sonst",
+    NXT_WAIT_UNTIL: "warte bis %1",
+    NXT_REPEAT_UNTIL: "wiederhole bis %1",
+    NXT_STOP_PROGRAM: "stoppe Programm",
+    NXT_TOUCH_PRESSED: "Berührungssensor an Port %1 gedrückt?",
+    NXT_LIGHT: "Lichtsensor an Port %1 Helligkeit %",
+    NXT_DISTANCE: "Ultraschallsensor an Port %1 Abstand cm",
+    NXT_SOUND_LEVEL: "Geräuschsensor an Port %1 Lautstärke %",
+    NXT_ROTATION: "Motor %1 Drehung in Grad",
+    NXT_RESET_ROTATION: "setze Drehung von Motor %1 zurück",
+    NXT_BUTTON_PRESSED: "NXT-Taste %1 gedrückt?",
+    NXT_TIMER: "Stoppuhr in Sekunden",
+    NXT_RESET_TIMER: "setze Stoppuhr zurück",
+    NXT_RANDOM: "Zufallszahl von %1 bis %2",
+    NXT_AND: "und",
+    NXT_OR: "oder",
+    NXT_NOT: "nicht %1",
+    NXT_TRUE: "wahr",
+    NXT_FALSE: "falsch",
+
+    NXT_FORWARD: "vorwärts",
+    NXT_BACKWARD: "rückwärts",
+    NXT_LEFT: "links",
+    NXT_RIGHT: "rechts",
+    NXT_SECONDS: "Sekunden",
+    NXT_ROTATIONS: "Umdrehungen",
+    NXT_DEGREES: "Grad",
+    NXT_ALL: "alle",
+    NXT_BTN_ORANGE: "orange",
+    NXT_BTN_LEFT: "Pfeil links",
+    NXT_BTN_RIGHT: "Pfeil rechts",
+    NXT_HELLO: "Hallo!",
+    NXT_NOTE_B: "H",
   },
 };
 
@@ -82,8 +145,8 @@ const MOTOR_PORTS = [["A", "A"], ["B", "B"], ["C", "C"]];
 const SENSOR_PORTS = [["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"]];
 const DIRECTIONS = [["%{BKY_NXT_FORWARD}", "fwd"], ["%{BKY_NXT_BACKWARD}", "rev"]];
 const LINES = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => [String(n), String(n)]);
-// Note names are the same in most languages that use these blocks; frequencies in Hz.
-const NOTES = [["C", "262"], ["D", "294"], ["E", "330"], ["F", "349"], ["G", "392"], ["A", "440"], ["B", "494"], ["C'", "523"]];
+// Frequencies in Hz. The note below the high C is called "B" in English and "H" in German.
+const NOTES = [["C", "262"], ["D", "294"], ["E", "330"], ["F", "349"], ["G", "392"], ["A", "440"], ["%{BKY_NXT_NOTE_B}", "494"], ["C'", "523"]];
 
 const dropdown = (name, options) => ({ type: "field_dropdown", name, options });
 const number = (name) => ({ type: "input_value", name, check: "Number" });
@@ -211,20 +274,24 @@ export const TOOLBOX = {
 };
 
 // The program a new user sees first.
-export const STARTER_WORKSPACE = {
-  blocks: {
-    languageVersion: 0,
-    blocks: [{
-      type: "nxt_start", x: 40, y: 40,
-      next: { block: {
-        type: "nxt_show_text", fields: { TEXT: "Hello!", LINE: "1" },
+export function starterWorkspace(language = "en") {
+  const hello = (MESSAGES[language] ?? MESSAGES.en).NXT_HELLO;
+  return {
+    blocks: {
+      languageVersion: 0,
+      blocks: [{
+        type: "nxt_start", x: 40, y: 40,
         next: { block: {
-          type: "nxt_beep", fields: { NOTE: "440" }, inputs: { SECONDS: num(0.3) },
+          type: "nxt_show_text", fields: { TEXT: hello, LINE: "1" },
           next: { block: {
-            type: "nxt_motor_for", fields: { PORT: "A", DIR: "fwd", UNIT: "s" }, inputs: { POWER: num(50), AMOUNT: num(1) },
+            type: "nxt_beep", fields: { NOTE: "440" }, inputs: { SECONDS: num(0.3) },
+            next: { block: {
+              type: "nxt_motor_for", fields: { PORT: "A", DIR: "fwd", UNIT: "s" }, inputs: { POWER: num(50), AMOUNT: num(1) },
+            } },
           } },
         } },
-      } },
-    }],
-  },
-};
+      }],
+    },
+  };
+}
+export const STARTER_WORKSPACE = starterWorkspace("en");

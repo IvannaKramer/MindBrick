@@ -2,168 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MindBrick – test page</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 0 auto; padding: 1rem; }
-    button { font-size: 1.1rem; padding: 0.8rem 1.2rem; margin: 0.25rem 0.25rem 0.25rem 0; border-radius: 0.6rem; border: 1px solid #888; }
-    button:disabled { opacity: 0.4; }
-    fieldset { border: 1px solid #ccc; border-radius: 0.6rem; margin: 1rem 0; }
-    #log { background: #111; color: #d6f5d6; padding: 0.8rem; border-radius: 0.6rem; min-height: 8rem; white-space: pre-wrap; font: 0.9rem ui-monospace, monospace; }
-    small { color: #666; }
-    textarea { width: 100%; box-sizing: border-box; height: 14rem; font: 0.95rem ui-monospace, monospace; border-radius: 0.6rem; padding: 0.6rem; }
-    input { font-size: 1.1rem; padding: 0.5rem; width: 9rem; border-radius: 0.6rem; border: 1px solid #888; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>MindBrick</title>
+  <link rel="stylesheet" href="app.css">
 </head>
 <body>
-  <h1>MindBrick – test page</h1>
-  <p>Checks that this browser can talk to an NXT brick, compile a program, upload it and start it.</p>
+  <header>
+    <div class="brand">
+      <!-- Our own logo: a brick with a play triangle. Not LEGO artwork. -->
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="9" width="26" height="19" rx="4" fill="#f2a900"/><rect x="7" y="4" width="7" height="6" rx="2" fill="#f2a900"/><rect x="18" y="4" width="7" height="6" rx="2" fill="#f2a900"/><path d="M13 13.5v10l9-5z" fill="#20303f"/></svg>
+      <span>MindBrick</span>
+    </div>
+    <input id="name" value="program1" maxlength="15" aria-label="Program name" autocomplete="off" spellcheck="false">
+    <div class="spacer"></div>
 
-  <fieldset>
-    <legend>1. Connect</legend>
-    <button id="usb">Connect via USB</button>
-    <button id="bt">Connect via Bluetooth</button>
-    <button id="disconnect" disabled>Disconnect</button>
-    <p><small>Bluetooth: first pair the brick in your device's Bluetooth settings (passkey 1234), then pick it here.</small></p>
-  </fieldset>
+    <div class="menu" id="connectMenu">
+      <button id="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg><span id="connectLabel">Connect</span></button>
+      <div class="menu-items">
+        <button id="connectBt">Bluetooth</button>
+        <small>Pair the brick in your device's Bluetooth settings first (passkey 1234).</small>
+        <button id="connectUsb">USB cable</button>
+        <button id="disconnect" hidden>Disconnect</button>
+      </div>
+    </div>
+    <button id="run"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg><span>Run on robot</span></button>
+    <button id="stop" disabled aria-label="Stop program"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg></button>
 
-  <fieldset>
-    <legend>2. Try it</legend>
-    <button class="needs-brick" id="info" disabled>Brick info</button>
-    <button class="needs-brick" id="beep" disabled>Beep</button>
-    <button class="needs-brick" id="files" disabled>List files</button>
-  </fieldset>
+    <div class="menu" id="moreMenu">
+      <button id="more" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg></button>
+      <div class="menu-items">
+        <button id="toggleCode">Show code</button>
+        <button id="save">Save program to file</button>
+        <button id="open">Open program from file</button>
+        <button id="newProgram">New program</button>
+        <a href="test.html">Developer test page</a>
+        <a href="https://github.com/IvannaKramer/MindBrick">About / source code</a>
+      </div>
+    </div>
+  </header>
 
-  <fieldset>
-    <legend>3. Upload and run</legend>
-    <button class="needs-brick" id="upload" disabled>Upload hello.rxe</button>
-    <button class="needs-brick" id="start" disabled>▶ Start hello.rxe</button>
-    <button class="needs-brick" id="stop" disabled>■ Stop any program</button>
-    <p><small>hello.rxe shows a text, beeps and turns motor A for one second. Make sure the robot can't drive off the table.</small></p>
-  </fieldset>
+  <main>
+    <div id="blockly"></div>
+    <aside id="codePanel"><h2>NXC code made from your blocks</h2><pre id="code"></pre></aside>
+  </main>
 
-  <fieldset>
-    <legend>4. Write a program (NXC), compile it here, send it to the brick</legend>
-    <textarea id="source" spellcheck="false">// Shows a text, beeps and turns motor A for one second.
-task main()
-{
-  TextOut(0, LCD_LINE1, "Made in browser");
-  PlayTone(660, 200);
-  Wait(250);
-  PlayTone(880, 300);
-  OnFwd(OUT_A, 50);   // motor A forward at 50 % power
-  Wait(1000);         // wait 1000 ms
-  Off(OUT_A);
-  Wait(1000);
-}
-</textarea>
-    <p>Program name: <input id="name" value="browser" maxlength="15"></p>
-    <button id="compile">Compile only</button>
-    <button class="needs-brick" id="run" disabled>Compile, upload and ▶ start</button>
-    <p><small>"Compile only" just checks the program. To run it on the robot, connect first (section 1), then use the second button.</small></p>
-    <p><small>The compiler (NBC by John Hansen, built as WebAssembly) runs inside this page; nothing is sent to a server.</small></p>
-  </fieldset>
+  <div id="status" role="status">Build a program, connect the robot, then press “Run on robot”.</div>
+  <footer>Independent hobby project for LEGO® MINDSTORMS® NXT bricks – not affiliated with or endorsed by the LEGO Group.</footer>
+  <input type="file" id="file" accept=".mindbrick,.json" hidden>
 
-  <div id="log"></div>
-  <p><small>Independent hobby project, not affiliated with or endorsed by the LEGO Group.</small></p>
-
-  <script type="module">
-    import { Brick, UsbTransport, SerialTransport } from "./nxt.js";
-
-    const $ = (id) => document.getElementById(id);
-    const log = (msg) => { $("log").textContent += msg + "\n"; };
-    let brick = null;
-
-    function setConnected(on) {
-      document.querySelectorAll(".needs-brick").forEach((b) => (b.disabled = !on));
-      $("disconnect").disabled = !on;
-      $("usb").disabled = $("bt").disabled = on;
-    }
-
-    // Wrap every button so errors end up in the log instead of disappearing.
-    function onClick(id, action) {
-      $(id).addEventListener("click", async () => {
-        try { await action(); } catch (e) { log("✗ " + e.message); }
-      });
-    }
-
-    async function connect(Transport) {
-      const transport = await Transport.request();
-      brick = new Brick(transport);
-      await brick.connect();
-      setConnected(true);
-      log(`✓ Connected via ${transport.name}`);
-    }
-
-    if (!("usb" in navigator)) { $("usb").disabled = true; log("This browser has no WebUSB (use Chrome or Edge)."); }
-    if (!("serial" in navigator)) { $("bt").disabled = true; log("This browser has no Web Serial (needs Chrome 117+ on desktop, 137+ on Android)."); }
-
-    // Let go of the brick when this tab is closed or reloaded, so another tab can connect.
-    window.addEventListener("pagehide", () => { brick?.disconnect().catch(() => {}); });
-
-    onClick("usb", () => connect(UsbTransport));
-    onClick("bt", () => connect(SerialTransport));
-    onClick("disconnect", async () => { await brick.disconnect(); brick = null; setConnected(false); log("Disconnected"); });
-
-    onClick("info", async () => {
-      const info = await brick.deviceInfo();
-      log(`Name ${info.name} · firmware ${await brick.firmwareVersion()} · battery ${await brick.batteryMillivolts()} mV · free flash ${info.freeFlash} bytes`);
-    });
-    onClick("beep", () => brick.playTone(880, 300));
-    onClick("files", async () => {
-      for (const f of await brick.listFiles()) log(`  ${f.name.padEnd(20)} ${String(f.size).padStart(6)}`);
-    });
-
-    onClick("upload", async () => {
-      const data = new Uint8Array(await (await fetch("hello.rxe")).arrayBuffer());
-      const began = performance.now();
-      await brick.uploadFile("hello.rxe", data);
-      log(`✓ Uploaded hello.rxe (${data.length} bytes) in ${Math.round(performance.now() - began)} ms`);
-    });
-
-    // --- compiler: lives in a worker so a slow tablet doesn't freeze while compiling
-    const worker = new Worker("nbc-worker.js", { type: "module" });
-    const waiting = new Map();
-    let nextId = 1;
-    worker.onmessage = ({ data }) => {
-      const { resolve, reject } = waiting.get(data.id);
-      waiting.delete(data.id);
-      data.error ? reject(new Error(data.error)) : resolve(data.result);
-    };
-    function compile(source) {
-      return new Promise((resolve, reject) => {
-        waiting.set(nextId, { resolve, reject });
-        worker.postMessage({ id: nextId++, source });
-      });
-    }
-
-    async function compileFromEditor() {
-      log("Compiling…");
-      const began = performance.now();
-      const result = await compile($("source").value);
-      for (const e of result.errors) log(`  line ${e.line}: ${e.message}`);
-      if (!result.ok) throw new Error("Compile failed – fix the lines above and try again.");
-      log(`✓ Compiled: ${result.rxe.length} bytes in ${Math.round(performance.now() - began)} ms`);
-      return result.rxe;
-    }
-
-    onClick("compile", compileFromEditor);
-    onClick("run", async () => {
-      const file = $("name").value.trim() + ".rxe";
-      const rxe = await compileFromEditor();
-      await brick.stopProgram().catch(() => {}); // a running program would block replacing its file
-      log(`Uploading ${file}…`);
-      await brick.uploadFile(file, rxe);
-      log("Starting…");
-      await brick.startProgram(file);
-      // Ask the brick instead of assuming: is our program really the one running now?
-      const running = await brick.currentProgram();
-      if (running === file) log(`▶ ${file} is running on the brick`);
-      else log(`✗ Start was accepted, but the brick says it is running: ${running ?? "nothing"}`);
-    });
-
-    onClick("start", async () => { await brick.startProgram("hello.rxe"); log("▶ hello.rxe started"); });
-    onClick("stop", async () => { await brick.stopProgram(); log("■ stopped"); });
-  </script>
+  <script src="vendor/blockly/blockly_compressed.js"></script>
+  <script src="vendor/blockly/blocks_compressed.js"></script>
+  <script src="vendor/blockly/msg/en.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

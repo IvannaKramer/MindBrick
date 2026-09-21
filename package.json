@@ -1,0 +1,13 @@
+{
+  "name": "mindbrick",
+  "private": true,
+  "type": "module",
+  "description": "Development tools only – the app in web/ needs no build step and no npm packages at run time.",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "vendor": "node tools/vendor-blockly.mjs"
+  },
+  "devDependencies": {
+    "blockly": "13.3.0"
+  }
+}

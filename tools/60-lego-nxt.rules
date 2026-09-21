@@ -1,0 +1,10 @@
+# udev rules so a normal (non-root) user can talk to a LEGO Mindstorms NXT over USB.
+# Install:
+#   sudo cp tools/60-lego-nxt.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+# then unplug and re-plug the brick.
+
+# NXT brick running normal firmware (stock LEGO, NXC, leJOS, ...)
+SUBSYSTEM=="usb", ATTR{idVendor}=="0694", ATTR{idProduct}=="0002", MODE="0666", TAG+="uaccess"
+# NXT brick in firmware-update mode (Atmel SAM-BA bootloader, the "clicking" brick)
+SUBSYSTEM=="usb", ATTR{idVendor}=="03eb", ATTR{idProduct}=="6124", MODE="0666", TAG+="uaccess"

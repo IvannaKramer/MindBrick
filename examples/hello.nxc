@@ -1,0 +1,10 @@
+// First test program: shows text, beeps, and turns motor A for one second.
+task main()
+{
+  TextOut(0, LCD_LINE1, "Hello MindBrick");
+  PlayTone(880, 300);
+  OnFwd(OUT_A, 50);   // motor A forward at 50 % power
+  Wait(1000);         // wait 1000 ms
+  Off(OUT_A);         // stop motor A (with brake)
+  Wait(1000);
+}

@@ -1,0 +1,55 @@
+// Bigger test: sensors, loops, if/else, variables, a second task, a function and strings.
+#define THRESHOLD 45
+
+int laps = 0;
+mutex motors;
+
+int clamp(int value, int low, int high)
+{
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
+}
+
+task watchdog()
+{
+  while (true) {
+    if (SensorUS(S4) < 15) {
+      Acquire(motors);
+      Off(OUT_BC);
+      PlayTone(440, 200);
+      Wait(500);
+      Release(motors);
+    }
+    Wait(50);
+  }
+}
+
+task main()
+{
+  SetSensorLight(S3);
+  SetSensorLowspeed(S4);
+  SetSensorTouch(S1);
+  start watchdog;
+  while (!Sensor(S1)) {
+    int error = Sensor(S3) - THRESHOLD;
+    int turn = clamp(error * 2, -40, 40);
+    Acquire(motors);
+    OnFwd(OUT_B, 50 + turn);
+    OnFwd(OUT_C, 50 - turn);
+    Release(motors);
+    laps++;
+    if (laps % 100 == 0) {
+      ClearScreen();
+      TextOut(0, LCD_LINE1, "Steps:");
+      NumOut(50, LCD_LINE1, laps);
+      string msg = StrCat("turn ", NumToStr(turn));
+      TextOut(0, LCD_LINE2, msg);
+    }
+    Wait(10);
+  }
+  Off(OUT_BC);
+  float avg = laps / 3.0;
+  NumOut(0, LCD_LINE4, avg);
+  Wait(2000);
+}

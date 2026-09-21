@@ -1,0 +1,7 @@
+// Deliberately wrong: used to check that compile errors are reported, not swallowed.
+task main()
+{
+  OnFwd(OUT_A, 50)
+  Wait(1000);
+  undefinedFunction(3);
+}

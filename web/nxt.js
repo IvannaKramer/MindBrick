@@ -219,6 +219,16 @@ export class Brick {
     await this.#command(DIRECT, 0x00, filenameBytes(name));
   }
 
+  // Name of the program that is running right now, or null if none is.
+  async currentProgram() {
+    try {
+      return text(await this.#command(DIRECT, 0x11));
+    } catch (e) {
+      if (e.status === 0xec) return null; // "no active program"
+      throw e;
+    }
+  }
+
   async stopProgram() {
     await this.#command(DIRECT, 0x01);
   }

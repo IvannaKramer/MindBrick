@@ -37,8 +37,8 @@
   <fieldset>
     <legend>3. Upload and run</legend>
     <button class="needs-brick" id="upload" disabled>Upload hello.rxe</button>
-    <button class="needs-brick" id="start" disabled>▶ Start</button>
-    <button class="needs-brick" id="stop" disabled>■ Stop</button>
+    <button class="needs-brick" id="start" disabled>▶ Start hello.rxe</button>
+    <button class="needs-brick" id="stop" disabled>■ Stop any program</button>
     <p><small>hello.rxe shows a text, beeps and turns motor A for one second. Make sure the robot can't drive off the table.</small></p>
   </fieldset>
 
@@ -58,8 +58,9 @@ task main()
 }
 </textarea>
     <p>Program name: <input id="name" value="browser" maxlength="15"></p>
-    <button id="compile">Compile</button>
+    <button id="compile">Compile only</button>
     <button class="needs-brick" id="run" disabled>Compile, upload and ▶ start</button>
+    <p><small>"Compile only" just checks the program. To run it on the robot, connect first (section 1), then use the second button.</small></p>
     <p><small>The compiler (NBC by John Hansen, built as WebAssembly) runs inside this page; nothing is sent to a server.</small></p>
   </fieldset>
 
@@ -148,9 +149,14 @@ task main()
       const file = $("name").value.trim() + ".rxe";
       const rxe = await compileFromEditor();
       await brick.stopProgram().catch(() => {}); // a running program would block replacing its file
+      log(`Uploading ${file}…`);
       await brick.uploadFile(file, rxe);
+      log("Starting…");
       await brick.startProgram(file);
-      log(`▶ ${file} uploaded and started`);
+      // Ask the brick instead of assuming: is our program really the one running now?
+      const running = await brick.currentProgram();
+      if (running === file) log(`▶ ${file} is running on the brick`);
+      else log(`✗ Start was accepted, but the brick says it is running: ${running ?? "nothing"}`);
     });
 
     onClick("start", async () => { await brick.startProgram("hello.rxe"); log("▶ hello.rxe started"); });

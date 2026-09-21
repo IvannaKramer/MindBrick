@@ -30,6 +30,12 @@ export class UsbTransport {
     return new UsbTransport(device);
   }
 
+  // Bricks this site was already allowed to use – connecting to them needs no chooser.
+  static async known() {
+    const devices = await navigator.usb.getDevices();
+    return devices.filter((d) => d.vendorId === NXT_VENDOR_ID && d.productId === NXT_PRODUCT_ID).map((d) => new UsbTransport(d));
+  }
+
   async open() {
     const d = this.device;
     await d.open();
@@ -75,6 +81,11 @@ export class SerialTransport {
   static async request() {
     const port = await navigator.serial.requestPort();
     return new SerialTransport(port);
+  }
+
+  // Ports this site was already allowed to use – connecting to them needs no chooser.
+  static async known() {
+    return (await navigator.serial.getPorts()).map((port) => new SerialTransport(port));
   }
 
   async open() {
@@ -139,6 +150,8 @@ const ERRORS = {
   0x92: "Illegal file name",
   0x93: "Illegal handle",
   0xbd: "Request failed (for example: file not found)",
+  0xdd: "Communication bus error (is a sensor plugged into this port?)",
+  0xe0: "Sensor channel is busy or not set up",
   0xbe: "Unknown command",
   0xbf: "Insane packet",
   0xc0: "Value out of range",
@@ -146,6 +159,16 @@ const ERRORS = {
   0xfb: "Insufficient memory available",
   0xff: "Bad arguments",
 };
+
+// [sensor type, sensor mode] bytes of the SETINPUTMODE command
+const SENSOR_MODES = {
+  none: [0x00, 0x00],
+  touch: [0x01, 0x20], // switch, boolean
+  light: [0x05, 0x80], // light sensor with its lamp on, percent
+  sound: [0x07, 0x80], // sound sensor dB, percent
+  distance: [0x0b, 0x00], // "low speed 9V" = powered I2C sensor
+};
+export const SENSOR_TYPE_IS_I2C = (type) => type === 0x0a || type === 0x0b;
 
 export class NxtError extends Error {
   constructor(status) {
@@ -236,6 +259,43 @@ export class Brick {
 
   async stopProgram() {
     await this.#command(DIRECT, 0x01);
+  }
+
+  // --- sensors and motors (for the live "Robot" panel; programs on the brick don't need these)
+
+  // kind: "touch" | "light" | "sound" | "distance" | "none". Uses the same settings as NXC's
+  // SetSensorTouch/Light/Sound/Lowspeed, so the panel shows the numbers a program will see.
+  async setupSensor(port, kind) {
+    const [type, mode] = SENSOR_MODES[kind];
+    await this.#command(DIRECT, 0x05, [port - 1, type, mode]);
+  }
+
+  // → { type, value } where value is the "scaled" reading (0/1 for touch, 0–100 for light and sound)
+  async readSensor(port) {
+    const r = await this.#command(DIRECT, 0x07, [port - 1]);
+    const scaled = u16(r, 9);
+    return { type: r[3], valid: r[1] === 1, value: scaled > 0x7fff ? scaled - 0x10000 : scaled };
+  }
+
+  // Ultrasonic sensor: it is a small I2C device, so we ask it for "measurement byte 0" and read the answer.
+  async readDistance(port) {
+    await this.#command(DIRECT, 0x0f, [port - 1, 2, 1, 0x02, 0x42]); // write 2 bytes, expect 1 back
+    for (let tries = 0; tries < 20; tries++) {
+      try {
+        const [ready] = await this.#command(DIRECT, 0x0e, [port - 1]);
+        if (ready >= 1) break;
+      } catch (e) {
+        if (e.status !== 0x20) throw e; // 0x20 = "still busy", just ask again
+      }
+    }
+    const r = await this.#command(DIRECT, 0x10, [port - 1]);
+    return r[0] >= 1 ? r[1] : null; // r[0] = bytes received, r[1] = centimetres (255 means "nothing in sight")
+  }
+
+  // Degrees the motor has turned since the last reset (same number as the "motor rotation" block).
+  async motorRotation(motor) {
+    const r = await this.#command(DIRECT, 0x06, ["ABC".indexOf(motor)]);
+    return u32(r, 18) | 0; // "| 0" turns the unsigned number into a signed one
   }
 
   // --- system commands

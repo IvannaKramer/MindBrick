@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>MindBrick</title>
+  <meta name="description" content="Program LEGO MINDSTORMS NXT robots with blocks, right in the browser.">
+  <meta name="theme-color" content="#20303f">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -13,46 +18,66 @@
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="9" width="26" height="19" rx="4" fill="#f2a900"/><rect x="7" y="4" width="7" height="6" rx="2" fill="#f2a900"/><rect x="18" y="4" width="7" height="6" rx="2" fill="#f2a900"/><path d="M13 13.5v10l9-5z" fill="#20303f"/></svg>
       <span>MindBrick</span>
     </div>
-    <input id="name" value="program1" maxlength="15" aria-label="Program name" autocomplete="off" spellcheck="false">
+    <input id="name" value="program1" maxlength="15" data-i18n-label="programName" autocomplete="off" spellcheck="false">
     <div class="spacer"></div>
 
     <div class="menu" id="connectMenu">
-      <button id="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg><span id="connectLabel">Connect</span></button>
+      <button id="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg><span id="connectLabel" data-i18n="connect"></span></button>
       <div class="menu-items">
-        <button id="connectBt">Bluetooth</button>
-        <small>Pair the brick in your device's Bluetooth settings first (passkey 1234).</small>
-        <button id="connectUsb">USB cable</button>
-        <button id="disconnect" hidden>Disconnect</button>
+        <button id="connectBtLast" data-i18n="bluetoothLast" hidden></button>
+        <button id="connectUsbLast" data-i18n="usbLast" hidden></button>
+        <button id="connectBt" data-i18n="bluetooth"></button>
+        <small id="pairHint" data-i18n="pairHint"></small>
+        <button id="connectUsb" data-i18n="usb"></button>
+        <button id="connectDemo" data-i18n="demoRobot" hidden></button>
+        <button id="disconnect" data-i18n="disconnect" hidden></button>
       </div>
     </div>
-    <button id="run"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg><span>Run on robot</span></button>
-    <button id="stop" disabled aria-label="Stop program"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg></button>
+    <button id="run"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg><span data-i18n="run"></span></button>
+    <button id="stop" disabled data-i18n-label="stop"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg></button>
+    <button id="robot" data-i18n-label="brickPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 14a8 8 0 0 1 16 0M12 14l4-5"/><circle cx="12" cy="14" r="1.4" fill="currentColor"/><path d="M4 19h16"/></svg></button>
 
     <div class="menu" id="moreMenu">
-      <button id="more" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg></button>
+      <button id="more" data-i18n-label="more"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg></button>
       <div class="menu-items">
-        <button id="toggleCode">Show code</button>
-        <button id="save">Save program to file</button>
-        <button id="open">Open program from file</button>
-        <button id="newProgram">New program</button>
-        <a href="test.html">Developer test page</a>
-        <a href="https://github.com/IvannaKramer/MindBrick">About / source code</a>
+        <button id="toggleCode" data-i18n="showCode"></button>
+        <button id="save" data-i18n="save"></button>
+        <button id="open" data-i18n="open"></button>
+        <button id="newProgram" data-i18n="newProgram"></button>
+        <details id="examplesList"><summary data-i18n="examples"></summary></details>
+        <details id="languageList"><summary data-i18n="language"></summary></details>
+        <a href="test.html" data-i18n="testPage"></a>
+        <a href="https://github.com/IvannaKramer/MindBrick" data-i18n="about"></a>
       </div>
     </div>
   </header>
 
   <main>
     <div id="blockly"></div>
-    <aside id="codePanel"><h2>NXC code made from your blocks</h2><pre id="code"></pre></aside>
+    <aside id="codePanel"><h2 data-i18n="codeTitle"></h2><pre id="code"></pre></aside>
+    <aside id="robotPanel">
+      <h2><span data-i18n="panelTitle"></span><button id="robotClose" data-i18n="panelClose"></button></h2>
+      <div class="panel-body">
+        <p id="panelConnectFirst" data-i18n="panelConnectFirst"></p>
+        <div id="panelLive" hidden>
+          <p id="panelRunningNote" class="note" data-i18n="panelRunningNote" hidden></p>
+          <h3 data-i18n="panelSensors"></h3>
+          <div id="sensorCards" class="cards"></div>
+          <h3 data-i18n="panelMotors"></h3>
+          <div id="motorCards" class="cards"></div>
+          <h3><span data-i18n="panelPrograms"></span> <small id="freeFlash"></small></h3>
+          <div id="programList"></div>
+        </div>
+      </div>
+    </aside>
   </main>
 
-  <div id="status" role="status">Build a program, connect the robot, then press “Run on robot”.</div>
-  <footer>Independent hobby project for LEGO® MINDSTORMS® NXT bricks – not affiliated with or endorsed by the LEGO Group.</footer>
+  <div id="status" role="status"></div>
+  <footer data-i18n="footer"></footer>
   <input type="file" id="file" accept=".mindbrick,.json" hidden>
 
   <script src="vendor/blockly/blockly_compressed.js"></script>
   <script src="vendor/blockly/blocks_compressed.js"></script>
-  <script src="vendor/blockly/msg/en.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

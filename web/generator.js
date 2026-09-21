@@ -5,7 +5,9 @@
 //
 // code        – the NXC program as text
 // lineToBlock – Map: line number in `code` → id of the block that produced it (to point at errors)
-// problems    – [{ blockId, message }] things we can already tell are wrong before compiling
+// sensors     – { port: kind } which sensor the program expects on which port, e.g. { 1: "touch" }
+// problems    – [{ blockId, key, values, message }] things we can already tell are wrong before compiling
+//               (key + values let the page show the message in the user's language)
 
 const ORDER = { ATOMIC: 0, UNARY: 4, MULTIPLY: 5, ADD: 6, RELATIONAL: 8, EQUALITY: 9, AND: 13, OR: 14, NONE: 99 };
 const MARK = " //#"; // invisible-to-the-user marker: "this line came from block <id>"
@@ -46,7 +48,7 @@ export function createNxcGenerator(Blockly) {
     const port = block.getFieldValue("PORT");
     const already = state.sensors.get(port);
     if (already && already !== kind) {
-      state.problems.push({ blockId: block.id, message: `Port ${port} is used as a ${SENSOR_NAMES[already]} and as a ${SENSOR_NAMES[kind]}. Pick a different port for one of them.` });
+      state.problems.push({ blockId: block.id, key: "problemPortConflict", values: [port, already, kind], message: `Port ${port} is used as a ${SENSOR_NAMES[already]} and as a ${SENSOR_NAMES[kind]}. Pick a different port for one of them.` });
     } else {
       state.sensors.set(port, kind);
     }
@@ -179,7 +181,7 @@ export function createNxcGenerator(Blockly) {
     G.init(workspace);
 
     const starts = workspace.getTopBlocks(true).filter((b) => b.type === "nxt_start" && b.isEnabled());
-    if (starts.length === 0) state.problems.push({ blockId: null, message: 'Add a "when program starts" block and attach your blocks below it.' });
+    if (starts.length === 0) state.problems.push({ blockId: null, key: "problemNoStart", values: [], message: 'Add a "when program starts" block and attach your blocks below it.' });
     const bodies = starts.map((start) => (start.getNextBlock() ? G.blockToCode(start.getNextBlock()) : ""));
 
     const variables = Blockly.Variables.allUsedVarModels(workspace).map((v) => `float ${G.getVariableName(v.getId())};`);
@@ -207,7 +209,7 @@ export function createNxcGenerator(Blockly) {
       return line.slice(0, at);
     }).join("\n");
 
-    return { code, lineToBlock, problems: state.problems };
+    return { code, lineToBlock, problems: state.problems, sensors: Object.fromEntries(state.sensors) };
   };
 }
 

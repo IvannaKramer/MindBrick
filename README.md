@@ -19,17 +19,22 @@ On Linux, USB needs a udev rule once: `bash tools/install_udev.sh`. On Windows, 
 ## What works today
 
 - Block editor with motors, movement (motors B + C), sound, display, control (loops, if/else, wait until), sensors (touch, light, ultrasonic, sound, brick buttons, rotation, timer), operators and variables
+- English and German (⋯ → Language); the browser's language is used at first
+- Example programs (⋯ → Examples): drive a square, avoid obstacles, follow a line, clap to start, play a melody
+- **Robot panel** (the gauge button): live sensor and motor values – handy for finding the right threshold – and the programs on the brick with Run / Delete and free memory
 - "Show code" panel with the NXC code made from the blocks; problems are shown on the block that caused them
 - Programs are saved in the browser automatically and can be saved to / opened from a file
 - The NBC compiler runs as WebAssembly inside the page – no server, no installation (see `compiler/`)
-- Connection over Bluetooth (Web Serial) or USB (WebUSB) – tested on Linux and on an Android tablet
+- Connection over Bluetooth (Web Serial) or USB (WebUSB), with "last robot" shortcuts that skip the chooser – tested on Linux and on an Android tablet
+- **Works offline** after the first visit and can be installed like an app (browser menu → "Install app" / "Add to home screen")
+- **Demo robot**: add `?demo` to the address to try everything without hardware
 - A developer test page (`test.html`) with brick info, file list and a plain NXC text editor
 
 ## Folders
 
-- `web/` – the app, no build step: `index.html` + `app.js` (editor page), `blocks.js` (block definitions and toolbox), `generator.js` (blocks → NXC), `nbc.js` + `nbc.wasm` (compiler), `nxt.js` (NXT protocol over USB/Bluetooth), `vendor/` (Blockly and a WASI shim, unmodified)
+- `web/` – the app, no build step: `index.html` + `app.js` (editor page), `blocks.js` (block definitions, toolbox, block texts), `generator.js` (blocks → NXC), `i18n.js` (page texts), `examples.js`, `nbc.js` + `nbc.wasm` (compiler), `nxt.js` (NXT protocol over USB/Bluetooth), `mock-brick.js` (the demo robot), `sw.js` (offline support), `vendor/` (Blockly and a WASI shim, unmodified)
 - `compiler/` – how `nbc.wasm` is built and tested
-- `test/` – tests for the block → NXC generator; every generated program is really compiled: `npm install && npm test`
+- `test/` – tests for the generator (every generated program is really compiled), the NXT protocol (against a pretend brick), translations and examples: `npm install && npm test`. After changing anything in `web/`, run `npm run sw` to refresh the offline file list
 - `examples/` – NXC example programs
 - `tools/` – helper scripts for developers (Python ones need `nxt-python`); `npm run vendor` refreshes `web/vendor/blockly`
 

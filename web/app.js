@@ -48,6 +48,21 @@ const theme = Blockly.Theme.defineTheme("mindbrick", {
   fontStyle: { family: "system-ui, sans-serif", weight: "600", size: 12 },
 });
 
+// Toolbox rows filled with their category colour, so children who can't read yet find blocks by colour.
+// The open category turns white with coloured text.
+class ColourCategory extends Blockly.ToolboxCategory {
+  addColourBorder_(colour) {
+    this.rowDiv_.style.backgroundColor = colour;
+  }
+  setSelected(isSelected) {
+    super.setSelected(isSelected);
+    this.rowDiv_.style.backgroundColor = isSelected ? "#fff" : this.colour_;
+    this.rowDiv_.style.boxShadow = isSelected ? `inset 0 0 0 4px ${this.colour_}` : "";
+    this.rowDiv_.querySelector(".blocklyToolboxCategoryLabel").style.color = isSelected ? this.colour_ : "#fff";
+  }
+}
+Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, Blockly.ToolboxCategory.registrationName, ColourCategory, true);
+
 const workspace = Blockly.inject("blockly", {
   toolbox: TOOLBOX,
   renderer: "zelos", // big rounded blocks that are easy to grab with a finger

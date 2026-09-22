@@ -31,6 +31,13 @@ button.on { background: var(--accent); }
 .menu-items { position: absolute; right: 0; top: calc(100% + 0.3rem); z-index: 100; background: #fff; border: 1px solid var(--line); border-radius: 0.8rem; padding: 0.4rem; display: none; flex-direction: column; gap: 0.3rem; min-width: 15rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); }
 .menu.open .menu-items { display: flex; }
 .menu-items button { justify-content: flex-start; width: 100%; }
+/* Big coloured icons in the connect menu, recognisable without reading */
+#connectMenu .menu-items button { gap: 0.75rem; padding: 0.45rem 0.9rem 0.45rem 0.45rem; text-align: left; }
+.menu-icon { flex: none; width: 2.6rem; height: 2.6rem; border-radius: 0.6rem; display: grid; place-items: center; color: #fff; }
+.menu-icon svg { width: 1.7rem; height: 1.7rem; }
+.menu-icon.usb { background: #4a5563; }
+.menu-icon.bt { background: #1f6fe0; }
+.menu-icon.off { background: var(--stop); }
 .menu-items small { color: var(--muted); padding: 0.2rem 0.5rem 0.4rem; font-weight: 400; }
 .menu-items a { color: var(--muted); padding: 0.4rem 0.5rem; font-size: 0.9rem; }
 
@@ -49,8 +56,8 @@ main { flex: 1; display: flex; min-height: 0; }
 footer { font-size: 0.75rem; color: var(--muted); padding: 0.25rem 0.8rem 0.4rem; background: #fff; }
 
 /* Bigger toolbox rows for fingers */
-.blocklyToolboxCategory { height: auto !important; min-height: 2.75rem; display: flex; align-items: center; padding-right: 0.6rem !important; }
-.blocklyToolboxCategoryLabel { font-size: 1.05rem !important; font-weight: 600; }
+.blocklyToolboxCategory { height: auto !important; min-height: 2.75rem; display: flex; align-items: center; padding: 0 0.8rem !important; margin: 0 0.35rem 0.35rem; border-radius: 0.7rem; }
+.blocklyToolboxCategoryLabel { font-size: 1.05rem !important; font-weight: 700; color: #fff; }
 
 @media (max-width: 700px) {
   .brand span, button .label-wide { display: none; }

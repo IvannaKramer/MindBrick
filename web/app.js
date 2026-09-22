@@ -1,6 +1,6 @@
 // app.js – the block editor page: Blockly workspace + connect + "Run on robot" + robot panel.
 /* global Blockly */
-import { defineBlocks, TOOLBOX, starterWorkspace } from "./blocks.js";
+import { defineBlocks, TOOLBOX, COLOURS, starterWorkspace } from "./blocks.js";
 import { createNxcGenerator, blockForLine } from "./generator.js";
 import { createCompilerClient } from "./compiler-client.js";
 import { Brick, UsbTransport, SerialTransport, SENSOR_TYPE_IS_I2C } from "./nxt.js";
@@ -45,6 +45,7 @@ const compile = createCompilerClient();
 const theme = Blockly.Theme.defineTheme("mindbrick", {
   base: Blockly.Themes.Zelos,
   startHats: true,
+  blockStyles: { variable_blocks: { colourPrimary: COLOURS.variables } }, // match the Variables toolbox row
   fontStyle: { family: "system-ui, sans-serif", weight: "600", size: 12 },
 });
 

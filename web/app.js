@@ -3,7 +3,7 @@
 import { defineBlocks, TOOLBOX, COLOURS, starterWorkspace } from "./blocks.js";
 import { createNxcGenerator, blockForLine } from "./generator.js";
 import { createCompilerClient } from "./compiler-client.js";
-import { Brick, UsbTransport, SerialTransport, SENSOR_TYPE_IS_I2C } from "./nxt.js";
+import { Brick, UsbTransport, SerialTransport, SENSOR_TYPE_IS_I2C, isValidBrickName } from "./nxt.js";
 import { LANGUAGES, pickLanguage, saveLanguage, createTranslator, translatePage } from "./i18n.js";
 import { EXAMPLES } from "./examples.js";
 import { MockTransport } from "./mock-brick.js";
@@ -157,6 +157,7 @@ function setConnected(on, label = t("connect")) {
   $("connect").classList.toggle("connected", on);
   $("connectLabel").textContent = label;
   $("disconnect").hidden = !on;
+  $("battery").hidden = !on;
   $("connectBt").hidden = $("connectUsb").hidden = $("pairHint").hidden = on;
   $("connectDemo").hidden = on || !demoMode;
   if (on) $("connectBtLast").hidden = $("connectUsbLast").hidden = true;
@@ -170,7 +171,11 @@ async function showBattery() {
   if (!brick || busy) return;
   try {
     const volts = (await brick.batteryMillivolts()) / 1000;
-    $("connectLabel").textContent = `${brickName} · ${volts.toFixed(1)} V`;
+    // Six AA batteries: about 9 V when new, the NXT gets unreliable below about 6.5 V.
+    const level = Math.min(1, Math.max(0.08, (volts - 6.5) / 2.3));
+    $("battery").firstElementChild.style.width = `${Math.round(level * 100)}%`;
+    $("battery").classList.toggle("low", level < 0.3);
+    $("battery").title = t("battery", volts.toFixed(1));
   } catch {
     await dropConnection(t("connectionLost"));
   }
@@ -203,6 +208,7 @@ async function openBrick(transport) {
 async function finishConnect(candidate, info, transport) {
   brick = candidate;
   brickName = info.name || "NXT";
+  $("robotName").value = brickName;
   setConnected(true, brickName);
   await showBattery();
   status(t("connected", brickName, transport.name), "ok");
@@ -437,6 +443,19 @@ async function refreshPrograms() {
     await handleBrickError(e);
   }
 }
+
+// Rename the brick: the new name shows on the connect button, the NXT screen and in Bluetooth lists.
+$("renameForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = $("robotName").value.trim();
+  if (!isValidBrickName(name)) return status(t("badRobotName"), "error");
+  panelAction(async () => {
+    await brick.setName(name);
+    brickName = name;
+    $("connectLabel").textContent = name;
+    status(t("renamed", name), "ok");
+  });
+});
 
 async function panelAction(action) {
   if (busy || !brick) return;

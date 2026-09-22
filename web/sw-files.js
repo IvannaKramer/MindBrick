@@ -1,5 +1,5 @@
 // Written by tools/make-sw-files.mjs – do not edit by hand.
-const VERSION = "8b0ef4e0ed53";
+const VERSION = "6e7820852cd1";
 const FILES = [
  "./",
  "app.css",

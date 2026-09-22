@@ -10,6 +10,7 @@ export class MockTransport {
   name = "Demo";
   maxData = 60;
   #reply = null;
+  #name = "DemoBot";
   #files = new Map([["demo.rxe", new Uint8Array(1234)]]);
   #handles = new Map();
   #nextHandle = 1;
@@ -77,7 +78,8 @@ export class MockTransport {
         return next ? ok(handle, ...bytes20(next[0]), ...le(next[1].length, 4)) : fail(0x87);
       }
       case 0x88: return ok(124, 1, 31, 1);
-      case 0x9b: return ok(...bytes20("DemoBot").slice(0, 15), 0, 0x16, 0x53, 0, 0, 0, 0, ...le(0, 4), ...le(40000 - [...this.#files.values()].reduce((n, f) => n + f.length, 0), 4));
+      case 0x98: this.#name = name20(t.slice(2)); return ok();
+      case 0x9b: return ok(...bytes20(this.#name).slice(0, 15), 0, 0x16, 0x53, 0, 0, 0, 0, ...le(0, 4), ...le(40000 - [...this.#files.values()].reduce((n, f) => n + f.length, 0), 4));
     }
     return fail(0xbe);
   }

@@ -3,15 +3,18 @@
 //
 // All texts go through Blockly.Msg (see MESSAGES) so that translations only need a second table.
 
-const COLOURS = {
+// One clearly different colour per category (yellow, blue, pink, purple, brown, orange, green, grey, red):
+// young children who can't read yet find the blocks by colour.
+export const COLOURS = {
   events: "#E0A100",
   motors: "#2F7DD1",
-  movement: "#C9457F",
+  movement: "#D6408F",
   sound: "#8A5BD0",
-  display: "#1FA39A",
+  display: "#9A6232",
   control: "#EE8522",
   sensors: "#3A9F52",
-  operators: "#5866CF",
+  operators: "#6B7480",
+  variables: "#D23A3A",
 };
 
 export const MESSAGES = {
@@ -269,7 +272,7 @@ export const TOOLBOX = {
       block("nxt_boolean"),
       block("nxt_random", { FROM: num(1), TO: num(10) }),
     ]),
-    { kind: "category", name: "%{BKY_NXT_CAT_VARIABLES}", custom: "VARIABLE", colour: "#B8527A" },
+    { kind: "category", name: "%{BKY_NXT_CAT_VARIABLES}", custom: "VARIABLE", colour: COLOURS.variables },
   ],
 };
 

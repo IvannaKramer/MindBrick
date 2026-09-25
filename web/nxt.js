@@ -188,6 +188,9 @@ function filenameBytes(name) {
   return bytes;
 }
 
+// Brick names: 1 to 15 plain characters (the NXT screen has no ä, ö, ü, …).
+export const isValidBrickName = (name) => /^[\x20-\x7e]{1,15}$/.test(name);
+
 function text(bytes) {
   const end = bytes.indexOf(0);
   return String.fromCharCode(...bytes.slice(0, end < 0 ? bytes.length : end));
@@ -304,6 +307,14 @@ export class Brick {
     const r = await this.#command(SYSTEM, 0x9b);
     const address = [...r.slice(15, 21)].map((b) => b.toString(16).padStart(2, "0")).join(":");
     return { name: text(r.slice(0, 15)), bluetoothAddress: address.toUpperCase(), freeFlash: u32(r, 26) };
+  }
+
+  // The brick keeps its name after switching off; it is also its Bluetooth name.
+  async setName(name) {
+    if (!isValidBrickName(name)) throw new Error(`"${name}" is not a valid NXT name (1–15 plain characters)`);
+    const bytes = new Uint8Array(16); // 15 characters + a closing zero
+    for (let i = 0; i < name.length; i++) bytes[i] = name.charCodeAt(i);
+    await this.#command(SYSTEM, 0x98, bytes);
   }
 
   async firmwareVersion() {

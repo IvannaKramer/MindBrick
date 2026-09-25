@@ -22,15 +22,15 @@
     <div class="spacer"></div>
 
     <div class="menu" id="connectMenu">
-      <button id="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg><span id="connectLabel" data-i18n="connect"></span></button>
+      <button id="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4"/></svg><span id="connectLabel" data-i18n="connect"></span><span id="battery" class="battery" hidden><span></span></span></button>
       <div class="menu-items">
-        <button id="connectBtLast" data-i18n="bluetoothLast" hidden></button>
-        <button id="connectUsbLast" data-i18n="usbLast" hidden></button>
-        <button id="connectBt" data-i18n="bluetooth"></button>
+        <button id="connectBtLast" hidden><span class="menu-icon bt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 7l11 10-5.5 5V2l5.5 5-11 10"/></svg></span><span data-i18n="bluetoothLast"></span></button>
+        <button id="connectUsbLast" hidden><span class="menu-icon usb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v15M9 6l3-3 3 3M12 15l-5-3V9M12 13l5-3V8"/><rect x="5.5" y="6" width="3" height="3"/><circle cx="17" cy="6.5" r="1.5"/><circle cx="12" cy="19.5" r="2"/></svg></span><span data-i18n="usbLast"></span></button>
+        <button id="connectBt"><span class="menu-icon bt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 7l11 10-5.5 5V2l5.5 5-11 10"/></svg></span><span data-i18n="bluetooth"></span></button>
         <small id="pairHint" data-i18n="pairHint"></small>
-        <button id="connectUsb" data-i18n="usb"></button>
-        <button id="connectDemo" data-i18n="demoRobot" hidden></button>
-        <button id="disconnect" data-i18n="disconnect" hidden></button>
+        <button id="connectUsb"><span class="menu-icon usb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v15M9 6l3-3 3 3M12 15l-5-3V9M12 13l5-3V8"/><rect x="5.5" y="6" width="3" height="3"/><circle cx="17" cy="6.5" r="1.5"/><circle cx="12" cy="19.5" r="2"/></svg></span><span data-i18n="usb"></span></button>
+        <button id="connectDemo" hidden><span class="menu-icon demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M4 12H2M22 12h-2M9 17h6"/><circle cx="12" cy="2.5" r="1" fill="currentColor"/><rect x="4" y="6" width="16" height="14" rx="3"/><circle cx="9" cy="12" r="1.6" fill="currentColor"/><circle cx="15" cy="12" r="1.6" fill="currentColor"/></svg></span><span data-i18n="demoRobot"></span></button>
+        <button id="disconnect" hidden><span class="menu-icon off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4M3 3l18 18"/></svg></span><span data-i18n="disconnect"></span></button>
       </div>
     </div>
     <button id="run"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg><span data-i18n="run"></span></button>
@@ -61,6 +61,11 @@
         <p id="panelConnectFirst" data-i18n="panelConnectFirst"></p>
         <div id="panelLive" hidden>
           <p id="panelRunningNote" class="note" data-i18n="panelRunningNote" hidden></p>
+          <h3 data-i18n="panelName"></h3>
+          <form id="renameForm" class="rename">
+            <input id="robotName" maxlength="15" autocomplete="off" spellcheck="false">
+            <button id="renameBtn" data-i18n="panelRename"></button>
+          </form>
           <h3 data-i18n="panelSensors"></h3>
           <div id="sensorCards" class="cards"></div>
           <h3 data-i18n="panelMotors"></h3>

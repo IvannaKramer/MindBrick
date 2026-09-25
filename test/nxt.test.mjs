@@ -99,3 +99,14 @@ test("ultrasonic distance: write, wait while the bus is busy, read", async () =>
   assert.deepEqual(sent[0], [0x00, 0x0f, 3, 2, 1, 0x02, 0x42]);
   assert.equal(polls, 3);
 });
+
+test("rename: 15 characters plus a closing zero; names the NXT can't show are refused", async () => {
+  const { sent, transport } = pretendBrick((t) => ok(t[1]));
+  const brick = new Brick(transport);
+  await brick.setName("Blitz");
+  assert.deepEqual(sent[0], [0x01, 0x98, ...name20("Blitz").slice(0, 16)]);
+  await assert.rejects(brick.setName(""));
+  await assert.rejects(brick.setName("Rakete-Nummer-16"));
+  await assert.rejects(brick.setName("Bär"));
+  assert.equal(sent.length, 1);
+});

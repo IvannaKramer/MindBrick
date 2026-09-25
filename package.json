@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test \"test/*.test.mjs\"",
     "vendor": "node tools/vendor-blockly.mjs",
-    "sw": "node tools/make-sw-files.mjs"
+    "sw": "node tools/make-sw-files.mjs",
+    "screenshots": "node tools/screenshots.mjs"
   },
   "devDependencies": {
     "blockly": "13.3.0"

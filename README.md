@@ -50,6 +50,7 @@ No installation. No new firmware. Works on a laptop or an Android tablet, over U
 | 💻 **Device** | Laptop / PC (Windows, macOS, Linux) **or** an Android tablet / phone | iPads and iPhones do not work – Safari cannot talk to USB or Bluetooth devices. |
 | 🌐 **Browser** | **Chrome** or **Edge** on desktop. On Android: **Chrome 137 or newer** | Firefox and Safari are not supported. |
 | 🔌 **Connection** | A USB cable (the NXT uses the square "USB-B" plug) **or** the brick's built-in Bluetooth | Bluetooth needs no cable and no driver, so it is the easiest choice on a tablet. |
+| ⚙️ **Motors** | For driving: **left wheel on port A, right wheel on port B** | The Movement blocks (*move*, *turn*) always use A and B. A third motor, for an arm or gripper, goes on port C. |
 | 🔋 **Batteries** | Six AA cells or the rechargeable pack, reasonably fresh | Below about 6.5 V the brick becomes unreliable. The battery symbol in the toolbar shows the level. |
 
 No hardware yet? Open **[the demo](https://ivannakramer.github.io/MindBrick/?demo)** and pick *Demo robot* – a pretend NXT that lets you try every button.
@@ -60,7 +61,7 @@ No hardware yet? Open **[the demo](https://ivannakramer.github.io/MindBrick/?dem
 
 | Step | What to do |
 |:---:|---|
-| **1** | **Switch on the NXT.** For **Bluetooth**, pair it once in your device's Bluetooth settings (the passkey is `1234`). For **USB**, plug in the cable. |
+| **1** | **Plug the two drive motors into ports A and B** (left wheel A, right wheel B) and **switch on the NXT.** For **Bluetooth**, pair it once in your device's Bluetooth settings (the passkey is `1234`). For **USB**, plug in the cable. |
 | **2** | **Open [ivannakramer.github.io/MindBrick](https://ivannakramer.github.io/MindBrick/)** in Chrome or Edge. |
 | **3** | **Press `Connect`**, choose *Bluetooth* or *USB cable*, then pick your brick in the browser's chooser window. |
 | **4** | **Build a program** by dragging blocks under the yellow *when program starts* block. |
@@ -130,9 +131,9 @@ Every program starts with the yellow **when program starts** hat. Blocks that ar
 |---|---|---|
 | 🟨 | **Start** | *when program starts* |
 | 🟦 | **Motors** | run motor A/B/C for … seconds / rotations / degrees · start motor · stop motor |
-| 🟪 | **Movement** (both drive motors B + C) | move forward / backward for … · turn left / right for … seconds · start moving with left / right power · stop moving |
+| 🟪 | **Movement** (both drive motors together: A = left, B = right) | move forward / backward for … · turn left / right for … seconds · start moving with left / right power · stop moving |
 | 🟣 | **Sound** | play note … for … seconds · play tone … Hz for … seconds |
-| 🟫 | **Display** | show text on line … · show number on line … · clear screen |
+| 🟫 | **Display** | show text on line … · show number on line … · show picture (smiley, heart, robot face) · clear screen |
 | 🟧 | **Control** | wait … seconds · repeat … times · forever · if · if / else · wait until · repeat until · stop program |
 | 🟩 | **Sensors** | touch sensor pressed? · light sensor % · ultrasonic distance cm · sound sensor % · brick button pressed? · motor rotation ° · reset rotation · timer · reset timer |
 | ⬜ | **Operators** | + − × ÷ · comparisons (= ≠ < > ≤ ≥) · and / or · not · true / false · random number |
@@ -205,7 +206,7 @@ While a program is running, the panel shows the sensor values as *that program* 
 
 | Example | Needs | What it shows |
 |---|---|---|
-| 🟥 **Drive a square** | motors on B and C | *repeat 4 times*, move for rotations, turn for seconds, play a note at the end |
+| 🟥 **Drive a square** | motors on A and B | *repeat 4 times*, move for rotations, turn for seconds, play a note at the end |
 | 🟩 **Avoid obstacles** | ultrasonic sensor on port 4 | *forever* + *if / else* with a sensor comparison |
 | 🟩 **Follow a line** | light sensor on port 3 | reading a sensor in a loop and steering with two motor powers |
 | 🟩 **Clap to start** | sound sensor on port 2 | *wait until* a sensor value crosses a threshold |
@@ -276,7 +277,7 @@ The *last robot* shortcut tries to reconnect without a chooser. If the brick is 
 <details>
 <summary><b>The robot behaves differently from what I expect.</b></summary>
 
-- Movement blocks assume the drive motors are on **B and C**. Motor blocks let you pick any port.
+- Movement blocks use the drive motors on **A and B** (A = left wheel, B = right wheel). If only one wheel turns, a motor is plugged into port C: move it to A or B. If the robot turns the wrong way, swap the two plugs. Motor blocks let you pick any port.
 - Sensor blocks must use the port the sensor is really plugged into. The Robot panel shows live values so you can check.
 - Turning by *seconds* depends on battery level and floor; adjust the number.
 - The block that caused a build problem is highlighted and the status line explains it.

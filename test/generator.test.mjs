@@ -123,3 +123,33 @@ test("error lines map back to blocks", () => {
   assert.ok(blockForLine(lineToBlock, line), "Wait(1000) belongs to the motor block");
   assert.equal(blockForLine(lineToBlock, 1), null);
 });
+
+test("movement blocks drive motors A and B together", async () => {
+  const { code, problems } = generate(workspaceFrom(program(start(
+    { type: "nxt_move_for", fields: { DIR: "fwd", UNIT: "s" }, inputs: { POWER: num(50), AMOUNT: num(1) } },
+    { type: "nxt_move_for", fields: { DIR: "rev", UNIT: "rot" }, inputs: { POWER: num(50), AMOUNT: num(2) } },
+    { type: "nxt_turn_for", fields: { SIDE: "left" }, inputs: { POWER: num(40), SECONDS: num(1) } },
+    { type: "nxt_move_start", inputs: { LEFT: num(30), RIGHT: num(60) } },
+    { type: "nxt_move_stop" },
+  ))));
+  assert.deepEqual(problems, []);
+  assert.match(code, /OnFwdSync\(OUT_AB, 50, 0\);/);
+  assert.match(code, /RotateMotorEx\(OUT_AB, -50, 720, 0, true, true\);/);
+  assert.match(code, /OnFwd\(OUT_A, -40\);\s+OnFwd\(OUT_B, 40\);/);
+  assert.match(code, /OnFwd\(OUT_A, 30\);\s+OnFwd\(OUT_B, 60\);/);
+  assert.match(code, /Off\(OUT_AB\);/);
+  assert.doesNotMatch(code, /OUT_C|OUT_BC/);
+  await mustCompile(code);
+});
+
+test("show picture: each picture is added once as a function and compiles", async () => {
+  const image = (name) => ({ type: "nxt_show_image", fields: { IMAGE: name } });
+  const { code, problems } = generate(workspaceFrom(program(start(image("smiley"), image("heart"), image("face"), image("heart")))));
+  assert.deepEqual(problems, []);
+  for (const name of ["smiley", "heart", "face"]) assert.equal(code.split(`void picture_${name}()`).length, 2, name);
+  assert.equal(code.split("picture_heart();").length, 3);
+  await mustCompile(code);
+
+  const none = generate(workspaceFrom(STARTER_WORKSPACE)).code;
+  assert.doesNotMatch(none, /picture_/);
+});

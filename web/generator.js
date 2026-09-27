@@ -15,12 +15,63 @@ const MARK = " //#"; // invisible-to-the-user marker: "this line came from block
 const SENSOR_SETUP = { touch: "SetSensorTouch", light: "SetSensorLight", sound: "SetSensorSound", distance: "SetSensorLowspeed" };
 const SENSOR_NAMES = { touch: "touch sensor", light: "light sensor", sound: "sound sensor", distance: "ultrasonic sensor" };
 
+// Pictures for the 100 x 64 display, drawn with lines, circles and rectangles. These drawing commands
+// are part of the stock firmware, so no picture file has to be stored on the brick.
+// Each picture becomes one small function that is added to the program only when a block uses it.
+const IMAGES = {
+  smiley: `  CircleOut(50, 32, 30);
+  CircleOut(50, 32, 29);
+  for (int x = 38; x <= 41; x++) {
+    LineOut(x, 37, x, 46);
+    LineOut(x + 21, 37, x + 21, 46);
+  }
+  for (int y = 0; y <= 1; y++) {
+    LineOut(33, 25 + y, 38, 19 + y);
+    LineOut(38, 19 + y, 44, 15 + y);
+    LineOut(44, 15 + y, 50, 14 + y);
+    LineOut(50, 14 + y, 56, 15 + y);
+    LineOut(56, 15 + y, 62, 19 + y);
+    LineOut(62, 19 + y, 67, 25 + y);
+  }
+`,
+  heart: `  int w[] = {15, 15, 15, 15, 14, 14, 14, 13, 13, 12, 11, 10, 9, 7, 5, 2};
+  for (int i = 0; i <= 30; i++) {
+    LineOut(50 - i, 6 + i, 50 + i, 6 + i);
+  }
+  for (int y = 37; y <= 40; y++) {
+    LineOut(20, y, 80, y);
+  }
+  for (int k = 0; k < 16; k++) {
+    LineOut(35 - w[k], 40 + k, 35 + w[k], 40 + k);
+    LineOut(65 - w[k], 40 + k, 65 + w[k], 40 + k);
+  }
+`,
+  face: `  RectOut(22, 4, 56, 50);
+  RectOut(23, 5, 54, 48);
+  LineOut(50, 54, 50, 60);
+  CircleOut(50, 61, 2);
+  RectOut(32, 32, 12, 12);
+  RectOut(56, 32, 12, 12);
+  RectOut(36, 36, 4, 4);
+  RectOut(60, 36, 4, 4);
+  LineOut(50, 24, 50, 30);
+  RectOut(34, 12, 32, 8);
+  LineOut(42, 12, 42, 20);
+  LineOut(50, 12, 50, 20);
+  LineOut(58, 12, 58, 20);
+  RectOut(16, 24, 6, 10);
+  RectOut(78, 24, 6, 10);
+`,
+};
+const imageFunction = (name) => `picture_${name}`;
+
 export function createNxcGenerator(Blockly) {
   const G = new Blockly.CodeGenerator("NXC");
   G.INDENT = "  ";
   G.addReservedWords(
     "task,main,int,long,float,short,byte,bool,char,string,unsigned,const,void,return,if,else,while,do,for,repeat,until," +
-    "switch,case,default,break,continue,start,stop,priority,mutex,struct,typedef,inline,safecall,sub,true,false,asm,goto",
+    "switch,case,default,break,continue,start,stop,priority,mutex,struct,typedef,inline,safecall,sub,true,false,asm,goto," +
+    "picture_smiley,picture_heart,picture_face",
   );
 
   let state; // reset for every generate() call
@@ -87,19 +138,22 @@ export function createNxcGenerator(Blockly) {
   };
   B.nxt_motor_stop = (b) => `Off(OUT_${b.getFieldValue("PORT")});\n`;
 
+  // Driving uses two motors: A is the left wheel, B is the right wheel. OnFwdSync and RotateMotorEx
+  // keep both motors in step, so the robot drives straight.
+  const LEFT = "OUT_A", RIGHT = "OUT_B", DRIVE = "OUT_AB";
   B.nxt_move_for = (b) => {
     const p = power(b, "POWER", b.getFieldValue("DIR") === "rev");
-    if (b.getFieldValue("UNIT") === "s") return `OnFwdSync(OUT_BC, ${p}, 0);\nWait(${milliseconds(b, "AMOUNT")});\nOff(OUT_BC);\n`;
+    if (b.getFieldValue("UNIT") === "s") return `OnFwdSync(${DRIVE}, ${p}, 0);\nWait(${milliseconds(b, "AMOUNT")});\nOff(${DRIVE});\n`;
     const amount = value(b, "AMOUNT", ORDER.MULTIPLY);
     const degrees = isNumber(amount) ? String(Math.round(Number(amount) * 360)) : `${amount} * 360`;
-    return `RotateMotorEx(OUT_BC, ${p}, ${degrees}, 0, true, true);\n`;
+    return `RotateMotorEx(${DRIVE}, ${p}, ${degrees}, 0, true, true);\n`;
   };
-  B.nxt_move_start = (b) => `OnFwd(OUT_B, ${power(b, "LEFT")});\nOnFwd(OUT_C, ${power(b, "RIGHT")});\n`;
+  B.nxt_move_start = (b) => `OnFwd(${LEFT}, ${power(b, "LEFT")});\nOnFwd(${RIGHT}, ${power(b, "RIGHT")});\n`;
   B.nxt_turn_for = (b) => {
     const left = b.getFieldValue("SIDE") === "left";
-    return `OnFwd(OUT_B, ${power(b, "POWER", left)});\nOnFwd(OUT_C, ${power(b, "POWER", !left)});\nWait(${milliseconds(b, "SECONDS")});\nOff(OUT_BC);\n`;
+    return `OnFwd(${LEFT}, ${power(b, "POWER", left)});\nOnFwd(${RIGHT}, ${power(b, "POWER", !left)});\nWait(${milliseconds(b, "SECONDS")});\nOff(${DRIVE});\n`;
   };
-  B.nxt_move_stop = () => "Off(OUT_BC);\n";
+  B.nxt_move_stop = () => `Off(${DRIVE});\n`;
 
   // PlayTone returns at once, so wait for the same time or the next note would cut this one off.
   const tone = (hz, ms) => `PlayTone(${hz}, ${ms});\nWait(${ms});\n`;
@@ -115,6 +169,11 @@ export function createNxcGenerator(Blockly) {
   B.nxt_show_number = (b) => {
     const line = `LCD_LINE${b.getFieldValue("LINE")}`;
     return `ClearLine(${line});\nNumOut(0, ${line}, ${value(b, "VALUE")});\n`;
+  };
+  B.nxt_show_image = (b) => {
+    const name = b.getFieldValue("IMAGE");
+    state.images.add(name);
+    return `${imageFunction(name)}();\n`;
   };
   B.nxt_clear_screen = () => "ClearScreen();\n";
 
@@ -175,7 +234,7 @@ export function createNxcGenerator(Blockly) {
   // ------------------------------------------------------------ whole program
 
   return function generate(workspace) {
-    state = { sensors: new Map(), problems: [], usesTimer: false };
+    state = { sensors: new Map(), problems: [], usesTimer: false, images: new Set() };
     G.nameDB_ = new Blockly.Names(G.RESERVED_WORDS_);
     G.nameDB_.setVariableMap(workspace.getVariableMap());
     G.init(workspace);
@@ -191,6 +250,7 @@ export function createNxcGenerator(Blockly) {
       + (state.usesTimer ? "__timerStart = CurrentTick();\n" : "");
 
     let program = "// Made with MindBrick blocks\n" + (variables.length ? variables.join("\n") + "\n" : "") + "\n";
+    for (const name of [...state.images].sort()) program += `void ${imageFunction(name)}()\n{\n  ClearScreen();\n${IMAGES[name]}}\n\n`;
     if (bodies.length <= 1) {
       program += `task main()\n{\n${G.prefixLines(setup + (bodies[0] ?? ""), G.INDENT)}}\n`;
     } else {

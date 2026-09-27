@@ -42,6 +42,10 @@ export const MESSAGES = {
     NXT_SHOW_TEXT: "show text %1 on line %2",
     NXT_SHOW_NUMBER: "show number %1 on line %2",
     NXT_CLEAR_SCREEN: "clear display",
+    NXT_SHOW_IMAGE: "show picture %1",
+    NXT_IMAGE_SMILEY: "smiley",
+    NXT_IMAGE_HEART: "heart",
+    NXT_IMAGE_FACE: "robot face",
     NXT_WAIT: "wait %1 seconds",
     NXT_REPEAT: "repeat %1 times",
     NXT_FOREVER: "forever",
@@ -104,6 +108,10 @@ export const MESSAGES = {
     NXT_SHOW_TEXT: "zeige Text %1 in Zeile %2",
     NXT_SHOW_NUMBER: "zeige Zahl %1 in Zeile %2",
     NXT_CLEAR_SCREEN: "lösche Anzeige",
+    NXT_SHOW_IMAGE: "zeige Bild %1",
+    NXT_IMAGE_SMILEY: "Smiley",
+    NXT_IMAGE_HEART: "Herz",
+    NXT_IMAGE_FACE: "Robotergesicht",
     NXT_WAIT: "warte %1 Sekunden",
     NXT_REPEAT: "wiederhole %1 mal",
     NXT_FOREVER: "wiederhole fortlaufend",
@@ -147,6 +155,7 @@ export const MESSAGES = {
 const MOTOR_PORTS = [["A", "A"], ["B", "B"], ["C", "C"]];
 const SENSOR_PORTS = [["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"]];
 const DIRECTIONS = [["%{BKY_NXT_FORWARD}", "fwd"], ["%{BKY_NXT_BACKWARD}", "rev"]];
+const IMAGES = [["%{BKY_NXT_IMAGE_SMILEY}", "smiley"], ["%{BKY_NXT_IMAGE_HEART}", "heart"], ["%{BKY_NXT_IMAGE_FACE}", "face"]];
 const LINES = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => [String(n), String(n)]);
 // Frequencies in Hz. The note below the high C is called "B" in English and "H" in German.
 const NOTES = [["C", "262"], ["D", "294"], ["E", "330"], ["F", "349"], ["G", "392"], ["A", "440"], ["%{BKY_NXT_NOTE_B}", "494"], ["C'", "523"]];
@@ -164,7 +173,7 @@ const BLOCKS = [
   { type: "nxt_motor_for", message0: "%{BKY_NXT_MOTOR_FOR}", args0: [dropdown("PORT", MOTOR_PORTS), dropdown("DIR", DIRECTIONS), number("POWER"), number("AMOUNT"), dropdown("UNIT", [["%{BKY_NXT_SECONDS}", "s"], ["%{BKY_NXT_ROTATIONS}", "rot"], ["%{BKY_NXT_DEGREES}", "deg"]])], inputsInline: true, ...statement, colour: COLOURS.motors },
   { type: "nxt_motor_stop", message0: "%{BKY_NXT_MOTOR_STOP}", args0: [dropdown("PORT", [...MOTOR_PORTS, ["%{BKY_NXT_ALL}", "ABC"]])], ...statement, colour: COLOURS.motors },
 
-  // --- driving with two motors (B = left wheel, C = right wheel, the usual NXT layout)
+  // --- driving with two motors (A = left wheel, B = right wheel)
   { type: "nxt_move_for", message0: "%{BKY_NXT_MOVE_FOR}", args0: [dropdown("DIR", DIRECTIONS), number("POWER"), number("AMOUNT"), dropdown("UNIT", [["%{BKY_NXT_SECONDS}", "s"], ["%{BKY_NXT_ROTATIONS}", "rot"]])], inputsInline: true, ...statement, colour: COLOURS.movement },
   { type: "nxt_move_start", message0: "%{BKY_NXT_MOVE_START}", args0: [number("LEFT"), number("RIGHT")], inputsInline: true, ...statement, colour: COLOURS.movement },
   { type: "nxt_turn_for", message0: "%{BKY_NXT_TURN_FOR}", args0: [dropdown("SIDE", [["%{BKY_NXT_LEFT}", "left"], ["%{BKY_NXT_RIGHT}", "right"]]), number("POWER"), number("SECONDS")], inputsInline: true, ...statement, colour: COLOURS.movement },
@@ -177,6 +186,7 @@ const BLOCKS = [
   // --- display
   { type: "nxt_show_text", message0: "%{BKY_NXT_SHOW_TEXT}", args0: [{ type: "field_input", name: "TEXT", text: "%{BKY_NXT_HELLO}" }, dropdown("LINE", LINES)], ...statement, colour: COLOURS.display },
   { type: "nxt_show_number", message0: "%{BKY_NXT_SHOW_NUMBER}", args0: [number("VALUE"), dropdown("LINE", LINES)], inputsInline: true, ...statement, colour: COLOURS.display },
+  { type: "nxt_show_image", message0: "%{BKY_NXT_SHOW_IMAGE}", args0: [dropdown("IMAGE", IMAGES)], ...statement, colour: COLOURS.display },
   { type: "nxt_clear_screen", message0: "%{BKY_NXT_CLEAR_SCREEN}", ...statement, colour: COLOURS.display },
 
   // --- control
@@ -241,6 +251,7 @@ export const TOOLBOX = {
     category("DISPLAY", COLOURS.display, [
       block("nxt_show_text"),
       block("nxt_show_number", { VALUE: num(0) }),
+      block("nxt_show_image"),
       block("nxt_clear_screen"),
     ]),
     category("CONTROL", COLOURS.control, [
